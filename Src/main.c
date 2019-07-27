@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "accelerometer.h"
+#include "logger.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -37,10 +38,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define LOG_MAX_BUFFER_LENGTH	1024
-#define LOG_UART_TIMEOUT 		5000
-
 #define LD2_BLINK_INTERVAL_MSEC	250
+#define READ_ACC_INTERVAL_MSEC	100
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -59,7 +58,7 @@ osThreadId popAcceleValTasHandle;
 osMessageQId acceleValsQueueHandle;
 osMutexId acceleReadingsMutexHandle;
 /* USER CODE BEGIN PV */
-char log_tx_buffer[LOG_MAX_BUFFER_LENGTH];
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -113,13 +112,12 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim2);
-
+  Logger_Init(&huart2);
   /* Initialize all sensors */
   Accelerometer_Init();
 
   //sanity check
-  sprintf(log_tx_buffer, "Hello!!\n\r");
-  HAL_UART_Transmit(&huart2, (uint8_t*) log_tx_buffer, strlen(log_tx_buffer), LOG_UART_TIMEOUT);
+  Logger_Send_Log("Hello!!\n\r", 10);
   /* USER CODE END 2 */
 
   /* Create the mutex(es) */
@@ -345,13 +343,6 @@ static void MX_GPIO_Init(void)
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void const * argument)
 {
-    
-    
-    
-    
-    
-    
-
   /* init code for MEMS */
   MX_MEMS_Init();
 
@@ -375,11 +366,19 @@ void StartDefaultTask(void const * argument)
 void StartTask02(void const * argument)
 {
   /* USER CODE BEGIN StartTask02 */
+  Logger_Send_Log("StartTask02\n\r", 14);
+
+  int32_t acc_data[ACC_DATA_NUM_OF_AXIS] = {0, };
+  char log_tx_buffer[LOG_MAX_BUFFER_LENGTH];
   /* Infinite loop */
   for(;;)
   {
+	Accelerometer_Sensor_Read_Axis(acc_data);
+    snprintf(log_tx_buffer, strlen(log_tx_buffer), "ACC_X: %d, ACC_Y: %d, ACC_Z: %d\r\n",
+    		(int)acc_data[ACC_DATA_INDEX_AXIS_X], (int)acc_data[ACC_DATA_INDEX_AXIS_Y], (int)acc_data[ACC_DATA_INDEX_AXIS_Z]);
+    Logger_Send_Log(log_tx_buffer, strlen(log_tx_buffer));
 
-    osDelay(1);
+    osDelay(READ_ACC_INTERVAL_MSEC);
   }
   /* USER CODE END StartTask02 */
 }
