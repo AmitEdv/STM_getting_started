@@ -368,6 +368,9 @@ void StartTask02(void const * argument)
   /* USER CODE BEGIN StartTask02 */
   Logger_Send_Log("StartTask02\n\r", 14);
 
+  //TODO - when to disable?
+  Accelerometer_Enable();
+
   int32_t acc_data[ACC_DATA_NUM_OF_AXIS] = {0, };
   char log_tx_buffer[LOG_MAX_BUFFER_LENGTH];
   /* Infinite loop */

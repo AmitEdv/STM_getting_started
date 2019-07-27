@@ -23,6 +23,8 @@ typedef enum acc_data_index_axis_e
 }acc_data_index_axis_e;
 
 void Accelerometer_Init(void);
+void Accelerometer_Enable(void);
+void Accelerometer_Disable(void);
 void Accelerometer_Sensor_Read_Axis(int32_t* const o_axis_data);
 
 #endif /* ACCELEROMETER_H_ */
