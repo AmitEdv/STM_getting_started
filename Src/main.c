@@ -24,7 +24,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "stdio.h"
+#include "string.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -34,7 +35,10 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define LOG_MAX_BUFFER_LENGTH	1024
+#define LOG_UART_TIMEOUT 		5000
 
+#define LD2_BLINK_INTERVAL_MSEC	250
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -55,7 +59,7 @@ osThreadId popAcceleValTasHandle;
 osMessageQId acceleValsQueueHandle;
 osMutexId acceleReadingsMutexHandle;
 /* USER CODE BEGIN PV */
-
+char log_tx_buffer[LOG_MAX_BUFFER_LENGTH];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -110,7 +114,9 @@ int main(void)
   MX_TIM2_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  HAL_TIM_Base_Start_IT(&htim2);
+  sprintf(log_tx_buffer, "Hello!\n\r");
+  HAL_UART_Transmit(&huart2, (uint8_t*) log_tx_buffer, strlen(log_tx_buffer), LOG_UART_TIMEOUT);
   /* USER CODE END 2 */
 
   /* Create the mutex(es) */
@@ -370,17 +376,12 @@ static void MX_GPIO_Init(void)
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void const * argument)
 {
-    
-    
-    
-    
-    
-
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+	HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+	osDelay(LD2_BLINK_INTERVAL_MSEC);
   }
   /* USER CODE END 5 */ 
 }
