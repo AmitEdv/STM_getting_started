@@ -10,7 +10,7 @@
 
 #include "stm32l1xx_hal.h"
 
-#define LOG_MAX_BUFFER_LENGTH	1024
+#define LOG_MAX_BUFFER_LENGTH	255
 
 void Logger_Init(UART_HandleTypeDef * app_huart_for_logger);
 void Logger_Send_Log(char * str, uint16_t str_len);

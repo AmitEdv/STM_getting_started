@@ -52,13 +52,13 @@ TIM_HandleTypeDef htim2;
 
 UART_HandleTypeDef huart2;
 
-osThreadId defaultTaskHandle;
-osThreadId pushAcceleValTaHandle;
-osThreadId popAcceleValTasHandle;
-osMessageQId acceleValsQueueHandle;
-osMutexId acceleReadingsMutexHandle;
+osThreadId_t defaultTaskHandle;
+osThreadId_t pushAcceleValTaHandle;
+osThreadId_t popAcceleValTasHandle;
+osMessageQueueId_t acceleValsQueueHandle;
+osMutexId_t acceleReadingsMutexHandle;
 /* USER CODE BEGIN PV */
-
+Accelerometer_Axes_t accelerometerValsQueue[];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -66,9 +66,9 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_USART2_UART_Init(void);
-void StartDefaultTask(void const * argument);
-void StartTask02(void const * argument);
-void StartTask03(void const * argument);
+void StartDefaultTask(void *argument);
+void StartTask02(void *argument);
+void StartTask03(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -120,10 +120,14 @@ int main(void)
   Logger_Send_Log("Hello!!\n\r", 10);
   /* USER CODE END 2 */
 
+  osKernelInitialize();
+
   /* Create the mutex(es) */
   /* definition and creation of acceleReadingsMutex */
-  osMutexDef(acceleReadingsMutex);
-  acceleReadingsMutexHandle = osMutexCreate(osMutex(acceleReadingsMutex));
+  const osMutexAttr_t acceleReadingsMutex_attributes = {
+    .name = "acceleReadingsMutex"
+  };
+  acceleReadingsMutexHandle = osMutexNew(&acceleReadingsMutex_attributes);
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
@@ -139,8 +143,10 @@ int main(void)
 
   /* Create the queue(s) */
   /* definition and creation of acceleValsQueue */
-  osMessageQDef(acceleValsQueue, 16, uint16_t);
-  acceleValsQueueHandle = osMessageCreate(osMessageQ(acceleValsQueue), NULL);
+  const osMessageQueueAttr_t acceleValsQueue_attributes = {
+    .name = "acceleValsQueue"
+  };
+  acceleValsQueueHandle = osMessageQueueNew (16, sizeof(Accelerometer_Axes_t), &acceleValsQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -148,16 +154,28 @@ int main(void)
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
-  defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+  const osThreadAttr_t defaultTask_attributes = {
+    .name = "defaultTask",
+    .priority = (osPriority_t) osPriorityNormal,
+    .stack_size = 128
+  };
+  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* definition and creation of pushAcceleValTa */
-  osThreadDef(pushAcceleValTa, StartTask02, osPriorityIdle, 0, 128);
-  pushAcceleValTaHandle = osThreadCreate(osThread(pushAcceleValTa), NULL);
+  const osThreadAttr_t pushAcceleValTa_attributes = {
+    .name = "pushAcceleValTa",
+    .priority = (osPriority_t) osPriorityLow,
+    .stack_size = 128
+  };
+  pushAcceleValTaHandle = osThreadNew(StartTask02, NULL, &pushAcceleValTa_attributes);
 
   /* definition and creation of popAcceleValTas */
-  osThreadDef(popAcceleValTas, StartTask03, osPriorityIdle, 0, 128);
-  popAcceleValTasHandle = osThreadCreate(osThread(popAcceleValTas), NULL);
+  const osThreadAttr_t popAcceleValTas_attributes = {
+    .name = "popAcceleValTas",
+    .priority = (osPriority_t) osPriorityLow,
+    .stack_size = 128
+  };
+  popAcceleValTasHandle = osThreadNew(StartTask03, NULL, &popAcceleValTas_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -341,7 +359,7 @@ static void MX_GPIO_Init(void)
   * @retval None
   */
 /* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void const * argument)
+void StartDefaultTask(void *argument)
 {
     
     
@@ -370,7 +388,7 @@ void StartDefaultTask(void const * argument)
 * @retval None
 */
 /* USER CODE END Header_StartTask02 */
-void StartTask02(void const * argument)
+void StartTask02(void *argument)
 {
   /* USER CODE BEGIN StartTask02 */
   Logger_Send_Log("StartTask02\n\r", 14);
@@ -378,17 +396,20 @@ void StartTask02(void const * argument)
   //TODO - when to disable?
   Accelerometer_Enable();
 
-  int32_t acc_data[ACC_DATA_NUM_OF_AXIS] = {0, };
-  char log_tx_buffer[LOG_MAX_BUFFER_LENGTH];
+  Accelerometer_Axes_t acc_data;
+//  char log_tx_buffer[LOG_MAX_BUFFER_LENGTH];
   /* Infinite loop */
   for(;;)
   {
-	Accelerometer_Sensor_Read_Axis(acc_data);
-    snprintf(log_tx_buffer, strlen(log_tx_buffer), "ACC_X: %d, ACC_Y: %d, ACC_Z: %d\r\n",
-    		(int)acc_data[ACC_DATA_INDEX_AXIS_X], (int)acc_data[ACC_DATA_INDEX_AXIS_Y], (int)acc_data[ACC_DATA_INDEX_AXIS_Z]);
-    Logger_Send_Log(log_tx_buffer, strlen(log_tx_buffer));
+	Logger_Send_Log("Task02\n\r", 9);
+	  Accelerometer_Sensor_Read_Axis(&acc_data);
+//    snprintf(log_tx_buffer, sizeof(log_tx_buffer), "ACC X: %d, Y: %d, Z: %d\n\r",
+//    		(int)acc_data.axis_x_val, (int)acc_data.axis_y_val, (int)acc_data.axis_z_val);
+//    Logger_Send_Log(log_tx_buffer, strlen(log_tx_buffer));
 
-    osDelay(READ_ACC_INTERVAL_MSEC);
+	osMessageQueuePut(acceleValsQueueHandle, &acc_data, 0, READ_ACC_INTERVAL_MSEC);
+
+	osDelay(READ_ACC_INTERVAL_MSEC);
   }
   /* USER CODE END StartTask02 */
 }
@@ -400,13 +421,23 @@ void StartTask02(void const * argument)
 * @retval None
 */
 /* USER CODE END Header_StartTask03 */
-void StartTask03(void const * argument)
+void StartTask03(void *argument)
 {
   /* USER CODE BEGIN StartTask03 */
+  Logger_Send_Log("StartTask03\n\r", 14);
+
+  Accelerometer_Axes_t acc_data;
+  char log_tx_buffer[LOG_MAX_BUFFER_LENGTH];
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+	Logger_Send_Log("Task03:\n\r", 10);
+	osMessageQueueGet(acceleValsQueueHandle, &acc_data, 0, READ_ACC_INTERVAL_MSEC);
+	snprintf(log_tx_buffer, sizeof(log_tx_buffer), "ACC X: %d, Y: %d, Z: %d\n\r",
+	      	(int)acc_data.axis_x_val, (int)acc_data.axis_y_val, (int)acc_data.axis_z_val);
+	Logger_Send_Log(log_tx_buffer, strlen(log_tx_buffer));
+
+	osDelay(1);
   }
   /* USER CODE END StartTask03 */
 }

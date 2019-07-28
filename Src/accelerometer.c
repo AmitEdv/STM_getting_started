@@ -14,16 +14,18 @@ uint32_t AccInstance = IKS01A3_LSM6DSO_0;
 
 void Accelerometer_Init(void)
 {
-  Logger_Send_Log("Accelerometer_Init\n\r", 21);
-  int32_t bsp_status = IKS01A3_MOTION_SENSOR_Init(AccInstance, MOTION_ACCELERO);
-  if (bsp_status != BSP_ERROR_NONE)
-  {
-    char log_tx_buffer[LOG_MAX_BUFFER_LENGTH];
-    snprintf(log_tx_buffer, strlen(log_tx_buffer), "Error- acc init failed, err code %d\n\r", (int)bsp_status);
-    Logger_Send_Log(log_tx_buffer, strlen(log_tx_buffer));
-    //TODO - return status to client, handle failure in the client level.
-    return;
-  }
+	Logger_Send_Log("Accelerometer_Init\n\r", 21);
+
+#warning - Acc code crashs. use below implementation once it does
+//  int32_t bsp_status = IKS01A3_MOTION_SENSOR_Init(AccInstance, MOTION_ACCELERO);
+//  if (bsp_status != BSP_ERROR_NONE)
+//  {
+//    char log_tx_buffer[LOG_MAX_BUFFER_LENGTH];
+//    snprintf(log_tx_buffer, strlen(log_tx_buffer), "Error- acc init failed, err code %d\n\r", (int)bsp_status);
+//    Logger_Send_Log(log_tx_buffer, strlen(log_tx_buffer));
+//    //TODO - return status to client, handle failure in the client level.
+//    return;
+//  }
 }
 
 /**
@@ -33,15 +35,16 @@ void Accelerometer_Init(void)
 void Accelerometer_Enable(void)
 {
   Logger_Send_Log("Accelerometer_Enable\n\r", 23);
-  int32_t bsp_status = IKS01A3_MOTION_SENSOR_Enable(AccInstance, MOTION_ACCELERO);
-  if (bsp_status != BSP_ERROR_NONE)
-  {
-    char log_tx_buffer[LOG_MAX_BUFFER_LENGTH];
-    snprintf(log_tx_buffer, strlen(log_tx_buffer), "Error- acc enable failed, err code %d\n\r", (int)bsp_status);
-    Logger_Send_Log(log_tx_buffer, strlen(log_tx_buffer));
-    //TODO - return status to client, handle failure in the client level.
-    return;
-  }
+#warning - Acc code crashs. use below implementation once it does
+//  int32_t bsp_status = IKS01A3_MOTION_SENSOR_Enable(AccInstance, MOTION_ACCELERO);
+//  if (bsp_status != BSP_ERROR_NONE)
+//  {
+//    char log_tx_buffer[LOG_MAX_BUFFER_LENGTH];
+//    snprintf(log_tx_buffer, strlen(log_tx_buffer), "Error- acc enable failed, err code %d\n\r", (int)bsp_status);
+//    Logger_Send_Log(log_tx_buffer, strlen(log_tx_buffer));
+//    //TODO - return status to client, handle failure in the client level.
+//    return;
+//  }
 }
 
 /**
@@ -50,7 +53,8 @@ void Accelerometer_Enable(void)
  */
 void Accelerometer_Disable(void)
 {
-  (void)IKS01A3_MOTION_SENSOR_Disable(AccInstance, MOTION_ACCELERO);
+#warning - Acc code crashs. use below implementation once it does
+	//  (void)IKS01A3_MOTION_SENSOR_Disable(AccInstance, MOTION_ACCELERO);
 }
 
 /**
@@ -61,31 +65,38 @@ void Accelerometer_Disable(void)
  * @param  Instance the device instance
  * @retval None
  */
-void Accelerometer_Sensor_Read_Axis(int32_t* const o_axis_data)
+void Accelerometer_Sensor_Read_Axis(Accelerometer_Axes_t* const o_axis_data)
 {
   Logger_Send_Log("Accelerometer_Sensor_Read_Axis\n\r", 33);
-  IKS01A3_MOTION_SENSOR_Axes_t acceleration;
-  uint8_t status = 0;
 
-  if (o_axis_data == NULL)
-  {
-	  Logger_Send_Log("Error- pointer for data is null\n\r", 35);
-	  //TODO - return status to client, handle failure in the client level.
-	  return;
-  }
+  o_axis_data->axis_x_val = 0x01;
+  o_axis_data->axis_y_val = 0x02;
+  o_axis_data->axis_z_val = 0x03;
+  return;
 
-  if ((IKS01A3_MOTION_SENSOR_Get_DRDY_Status(AccInstance, (uint32_t)MOTION_ACCELERO, &status) != BSP_ERROR_NONE)
-	  || (status != ACC_STATUS_OK))
-  {
-	  Logger_Send_Log("Error- could not receive acc data\n\r", 36);
-	  //TODO - return status to client, handle failure in the client level.
-	  return;
-  }
-
- (void)IKS01A3_MOTION_SENSOR_GetAxes(AccInstance, MOTION_ACCELERO, &acceleration);
-  o_axis_data[ACC_DATA_INDEX_AXIS_X] = acceleration.x;
-  o_axis_data[ACC_DATA_INDEX_AXIS_Y] = acceleration.y;
-  o_axis_data[ACC_DATA_INDEX_AXIS_Z] = acceleration.z;
-
-  //TODO - return status ok to client
+#warning - Acc code crashs. use below implementation once it does
+//  IKS01A3_MOTION_SENSOR_Axes_t acceleration;
+//  uint8_t status = 0;
+//
+//  if (o_axis_data == NULL)
+//  {
+//	  Logger_Send_Log("Error- pointer for data is null\n\r", 35);
+//	  //TODO - return status to client, handle failure in the client level.
+//	  return;
+//  }
+//
+//  if ((IKS01A3_MOTION_SENSOR_Get_DRDY_Status(AccInstance, (uint32_t)MOTION_ACCELERO, &status) != BSP_ERROR_NONE)
+//	  || (status != ACC_STATUS_OK))
+//  {
+//	  Logger_Send_Log("Error- could not receive acc data\n\r", 36);
+//	  //TODO - return status to client, handle failure in the client level.
+//	  return;
+//  }
+//
+// (void)IKS01A3_MOTION_SENSOR_GetAxes(AccInstance, MOTION_ACCELERO, &acceleration);
+//  o_axis_data->axis_x_val = acceleration.x;
+//  o_axis_data->axis_y_val = acceleration.y;
+//  o_axis_data->axis_z_val = acceleration.z;
+//
+//  //TODO - return status ok to client
 }
