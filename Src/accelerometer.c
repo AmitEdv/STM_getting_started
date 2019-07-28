@@ -5,17 +5,17 @@
  *      Author: Amit
  */
 #include "accelerometer.h"
-#include <iks01a2_motion_sensors.h>
-#include <iks01a2_motion_sensors_ex.h>
+#include <iks01a3_motion_sensors.h>
+#include <iks01a3_motion_sensors_ex.h>
 #include <stdio.h>
 #include "logger.h"
 
-uint32_t AccInstance = IKS01A2_LSM6DSL_0;
+uint32_t AccInstance = IKS01A3_LSM6DSO_0;
 
 void Accelerometer_Init(void)
 {
   Logger_Send_Log("Accelerometer_Init\n\r", 21);
-  int32_t bsp_status = IKS01A2_MOTION_SENSOR_Init(AccInstance, MOTION_ACCELERO);
+  int32_t bsp_status = IKS01A3_MOTION_SENSOR_Init(AccInstance, MOTION_ACCELERO);
   if (bsp_status != BSP_ERROR_NONE)
   {
     char log_tx_buffer[LOG_MAX_BUFFER_LENGTH];
@@ -33,8 +33,7 @@ void Accelerometer_Init(void)
 void Accelerometer_Enable(void)
 {
   Logger_Send_Log("Accelerometer_Enable\n\r", 23);
-  int32_t bsp_status = -1;
-  //int32_t bsp_status = IKS01A2_MOTION_SENSOR_Enable(AccInstance, MOTION_ACCELERO);
+  int32_t bsp_status = IKS01A3_MOTION_SENSOR_Enable(AccInstance, MOTION_ACCELERO);
   if (bsp_status != BSP_ERROR_NONE)
   {
     char log_tx_buffer[LOG_MAX_BUFFER_LENGTH];
@@ -51,7 +50,7 @@ void Accelerometer_Enable(void)
  */
 void Accelerometer_Disable(void)
 {
-  (void)IKS01A2_MOTION_SENSOR_Disable(AccInstance, MOTION_ACCELERO);
+  (void)IKS01A3_MOTION_SENSOR_Disable(AccInstance, MOTION_ACCELERO);
 }
 
 /**
@@ -65,7 +64,7 @@ void Accelerometer_Disable(void)
 void Accelerometer_Sensor_Read_Axis(int32_t* const o_axis_data)
 {
   Logger_Send_Log("Accelerometer_Sensor_Read_Axis\n\r", 33);
-  IKS01A2_MOTION_SENSOR_Axes_t acceleration;
+  IKS01A3_MOTION_SENSOR_Axes_t acceleration;
   uint8_t status = 0;
 
   if (o_axis_data == NULL)
@@ -75,7 +74,7 @@ void Accelerometer_Sensor_Read_Axis(int32_t* const o_axis_data)
 	  return;
   }
 
-  if ((IKS01A2_MOTION_SENSOR_Get_DRDY_Status(AccInstance, (uint32_t)MOTION_ACCELERO, &status) != BSP_ERROR_NONE)
+  if ((IKS01A3_MOTION_SENSOR_Get_DRDY_Status(AccInstance, (uint32_t)MOTION_ACCELERO, &status) != BSP_ERROR_NONE)
 	  || (status != ACC_STATUS_OK))
   {
 	  Logger_Send_Log("Error- could not receive acc data\n\r", 36);
@@ -83,7 +82,7 @@ void Accelerometer_Sensor_Read_Axis(int32_t* const o_axis_data)
 	  return;
   }
 
- (void)IKS01A2_MOTION_SENSOR_GetAxes(AccInstance, MOTION_ACCELERO, &acceleration);
+ (void)IKS01A3_MOTION_SENSOR_GetAxes(AccInstance, MOTION_ACCELERO, &acceleration);
   o_axis_data[ACC_DATA_INDEX_AXIS_X] = acceleration.x;
   o_axis_data[ACC_DATA_INDEX_AXIS_Y] = acceleration.y;
   o_axis_data[ACC_DATA_INDEX_AXIS_Z] = acceleration.z;

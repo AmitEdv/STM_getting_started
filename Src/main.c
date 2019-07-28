@@ -343,6 +343,13 @@ static void MX_GPIO_Init(void)
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void const * argument)
 {
+    
+    
+    
+    
+    
+    
+
   /* init code for MEMS */
   MX_MEMS_Init();
 
