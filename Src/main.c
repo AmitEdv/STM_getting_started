@@ -33,7 +33,13 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+typedef enum acc_val_axis_index_e
+{
+	E_ACC_VAL_INDEX_AXIS_X,
+	E_ACC_VAL_INDEX_AXIS_Y,
+	E_ACC_VAL_INDEX_AXIS_Z,
+	E_ACC_VAL_INDEX_NUM_OF_AXES
+}acc_axis_val_index_e;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -58,7 +64,7 @@ osThreadId_t popAcceleValTasHandle;
 osMessageQueueId_t acceleValsQueueHandle;
 osMutexId_t acceleReadingsMutexHandle;
 /* USER CODE BEGIN PV */
-Accelerometer_Axes_t accelerometerValsQueue[];
+int32_t accelerometerValsBuff[E_ACC_VAL_INDEX_NUM_OF_AXES];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -117,7 +123,7 @@ int main(void)
   Accelerometer_Init();
 
   //sanity check
-  Logger_Send_Log("Hello!!\n\r", 10);
+  Logger_Send_Log("Hello!!\n\r", 12);
   /* USER CODE END 2 */
 
   osKernelInitialize();
@@ -361,13 +367,6 @@ static void MX_GPIO_Init(void)
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
-    
-    
-    
-    
-    
-    
-
   /* init code for MEMS */
   MX_MEMS_Init();
 
@@ -391,7 +390,7 @@ void StartDefaultTask(void *argument)
 void StartTask02(void *argument)
 {
   /* USER CODE BEGIN StartTask02 */
-  Logger_Send_Log("StartTask02\n\r", 14);
+  Logger_Send_Log("StartTask02\n\r", 16);
 
   //TODO - when to disable?
   Accelerometer_Enable();
@@ -401,12 +400,11 @@ void StartTask02(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	Logger_Send_Log("Task02\n\r", 9);
+	Logger_Send_Log("Task02\n\r", 11);
 	  Accelerometer_Sensor_Read_Axis(&acc_data);
 //    snprintf(log_tx_buffer, sizeof(log_tx_buffer), "ACC X: %d, Y: %d, Z: %d\n\r",
 //    		(int)acc_data.axis_x_val, (int)acc_data.axis_y_val, (int)acc_data.axis_z_val);
 //    Logger_Send_Log(log_tx_buffer, strlen(log_tx_buffer));
-
 	osMessageQueuePut(acceleValsQueueHandle, &acc_data, 0, READ_ACC_INTERVAL_MSEC);
 
 	osDelay(READ_ACC_INTERVAL_MSEC);
@@ -424,14 +422,14 @@ void StartTask02(void *argument)
 void StartTask03(void *argument)
 {
   /* USER CODE BEGIN StartTask03 */
-  Logger_Send_Log("StartTask03\n\r", 14);
+  Logger_Send_Log("StartTask03\n\r", 16);
 
   Accelerometer_Axes_t acc_data;
   char log_tx_buffer[LOG_MAX_BUFFER_LENGTH];
   /* Infinite loop */
   for(;;)
   {
-	Logger_Send_Log("Task03:\n\r", 10);
+	Logger_Send_Log("Task03:\n\r", 12);
 	osMessageQueueGet(acceleValsQueueHandle, &acc_data, 0, READ_ACC_INTERVAL_MSEC);
 	snprintf(log_tx_buffer, sizeof(log_tx_buffer), "ACC X: %d, Y: %d, Z: %d\n\r",
 	      	(int)acc_data.axis_x_val, (int)acc_data.axis_y_val, (int)acc_data.axis_z_val);

@@ -13,18 +13,16 @@
 
 #define ACC_STATUS_OK	1U
 
-typedef enum acc_data_index_axis_e
+typedef struct Accelerometer_Axes_t
 {
-	ACC_DATA_INDEX_AXIS_X = 0,
-	ACC_DATA_INDEX_AXIS_Y,
-	ACC_DATA_INDEX_AXIS_Z,
-
-	ACC_DATA_NUM_OF_AXIS
-}acc_data_index_axis_e;
+	int32_t axis_x_val;
+	int32_t axis_y_val;
+	int32_t axis_z_val;
+}Accelerometer_Axes_t;
 
 void Accelerometer_Init(void);
 void Accelerometer_Enable(void);
 void Accelerometer_Disable(void);
-void Accelerometer_Sensor_Read_Axis(int32_t* const o_axis_data);
+void Accelerometer_Sensor_Read_Axis(Accelerometer_Axes_t* const o_axis_data);
 
 #endif /* ACCELEROMETER_H_ */

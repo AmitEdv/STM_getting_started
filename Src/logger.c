@@ -42,6 +42,5 @@ void Logger_Send_Log(char * str, uint16_t str_len)
 	HAL_UART_Transmit(p_huart, (uint8_t*)str, str_len, LOG_UART_TIMEOUT);
 #else
 	//do nothing
-	return;
 #endif
 }
