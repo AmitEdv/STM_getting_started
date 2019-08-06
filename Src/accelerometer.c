@@ -8,13 +8,15 @@
 #include <iks01a3_motion_sensors.h>
 #include <iks01a3_motion_sensors_ex.h>
 #include <stdio.h>
+#include <string.h>
 #include "logger.h"
 
 uint32_t AccInstance = IKS01A3_LSM6DSO_0;
 
 void Accelerometer_Init(void)
 {
-	Logger_Send_Log("Accelerometer_Init\n\r", 23);
+  char log[LOG_MAX_BUFFER_LENGTH] = "Accelerometer_Init\n\r";
+  Logger_Send_Log(log, strlen(log));
 
 #warning - Acc code crashs. use below implementation once it does
 //  int32_t bsp_status = IKS01A3_MOTION_SENSOR_Init(AccInstance, MOTION_ACCELERO);
@@ -34,7 +36,9 @@ void Accelerometer_Init(void)
  */
 void Accelerometer_Enable(void)
 {
-  Logger_Send_Log("Accelerometer_Enable\n\r", 25);
+  char log[LOG_MAX_BUFFER_LENGTH] = "Accelerometer_Enable\n\r";
+  Logger_Send_Log(log, strlen(log));
+
 #warning - Acc code crashs. use below implementation once it does
 //  int32_t bsp_status = IKS01A3_MOTION_SENSOR_Enable(AccInstance, MOTION_ACCELERO);
 //  if (bsp_status != BSP_ERROR_NONE)
@@ -67,11 +71,12 @@ void Accelerometer_Disable(void)
  */
 void Accelerometer_Sensor_Read_Axis(Accelerometer_Axes_t* const o_axis_data)
 {
-  Logger_Send_Log("Accelerometer_Sensor_Read_Axis\n\r", 35);
+  char log[LOG_MAX_BUFFER_LENGTH] = "Accelerometer_Sensor_Read_Axis\n\r";
+  Logger_Send_Log(log, strlen(log));
 
-  o_axis_data->axis_x_val = 0x01;
-  o_axis_data->axis_y_val = 0x02;
-  o_axis_data->axis_z_val = 0x03;
+  o_axis_data->axis_x_val = (int32_t)2;
+  o_axis_data->axis_y_val = (int32_t)3;
+  o_axis_data->axis_z_val = (int32_t)4;
   return;
 
 #warning - Acc code crashs. use below implementation once it does
@@ -80,7 +85,8 @@ void Accelerometer_Sensor_Read_Axis(Accelerometer_Axes_t* const o_axis_data)
 //
 //  if (o_axis_data == NULL)
 //  {
-//	  Logger_Send_Log("Error- pointer for data is null\n\r", 37);
+//    char log[LOG_MAX_BUFFER_LENGTH] = "Error- pointer for data is null\n\r";
+//	  Logger_Send_Log(log, strlen(log));
 //	  //TODO - return status to client, handle failure in the client level.
 //	  return;
 //  }
@@ -88,7 +94,8 @@ void Accelerometer_Sensor_Read_Axis(Accelerometer_Axes_t* const o_axis_data)
 //  if ((IKS01A3_MOTION_SENSOR_Get_DRDY_Status(AccInstance, (uint32_t)MOTION_ACCELERO, &status) != BSP_ERROR_NONE)
 //	  || (status != ACC_STATUS_OK))
 //  {
-//	  Logger_Send_Log("Error- could not receive acc data\n\r", 38);
+//    char log[LOG_MAX_BUFFER_LENGTH] = "Error- could not receive acc data\n\r";
+//	  Logger_Send_Log(log, strlen(log));
 //	  //TODO - return status to client, handle failure in the client level.
 //	  return;
 //  }

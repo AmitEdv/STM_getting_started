@@ -64,7 +64,10 @@ osThreadId_t popAcceleValTasHandle;
 osMessageQueueId_t acceleValsQueueHandle;
 osMutexId_t acceleReadingsMutexHandle;
 /* USER CODE BEGIN PV */
-int32_t accelerometerValsBuff[E_ACC_VAL_INDEX_NUM_OF_AXES];
+////////////////////////
+//AMIT-TEST
+//int32_t accelerometerValsBuff[E_ACC_VAL_INDEX_NUM_OF_AXES];
+////////////////////////
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -123,7 +126,8 @@ int main(void)
   Accelerometer_Init();
 
   //sanity check
-  Logger_Send_Log("Hello!!\n\r", 12);
+  char log[LOG_MAX_BUFFER_LENGTH] = "Hello!!\n\r";
+  Logger_Send_Log(log, strlen(log));
   /* USER CODE END 2 */
 
   osKernelInitialize();
@@ -152,7 +156,7 @@ int main(void)
   const osMessageQueueAttr_t acceleValsQueue_attributes = {
     .name = "acceleValsQueue"
   };
-  acceleValsQueueHandle = osMessageQueueNew (16, sizeof(Accelerometer_Axes_t), &acceleValsQueue_attributes);
+  acceleValsQueueHandle = osMessageQueueNew (5, sizeof(Accelerometer_Axes_t), &acceleValsQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -389,22 +393,30 @@ void StartDefaultTask(void *argument)
 /* USER CODE END Header_StartTask02 */
 void StartTask02(void *argument)
 {
-  /* USER CODE BEGIN StartTask02 */
-  Logger_Send_Log("StartTask02\n\r", 16);
+//  /* USER CODE BEGIN StartTask02 */
 
-  //TODO - when to disable?
+  char log[LOG_MAX_BUFFER_LENGTH] = "StartTask02\n\r";
+  Logger_Send_Log(log, strlen(log));
+
+//  //TODO - when to disable?
   Accelerometer_Enable();
 
   Accelerometer_Axes_t acc_data;
-//  char log_tx_buffer[LOG_MAX_BUFFER_LENGTH];
-  /* Infinite loop */
+  char log_tx_buffer[LOG_MAX_BUFFER_LENGTH];
+//  /* Infinite loop */
   for(;;)
   {
 	Logger_Send_Log("Task02\n\r", 11);
-	  Accelerometer_Sensor_Read_Axis(&acc_data);
-//    snprintf(log_tx_buffer, sizeof(log_tx_buffer), "ACC X: %d, Y: %d, Z: %d\n\r",
-//    		(int)acc_data.axis_x_val, (int)acc_data.axis_y_val, (int)acc_data.axis_z_val);
-//    Logger_Send_Log(log_tx_buffer, strlen(log_tx_buffer));
+	Accelerometer_Sensor_Read_Axis(&acc_data);
+
+	////////////////////////
+	//AMIT-TEST
+//	accelerometerValsBuff[E_ACC_VAL_INDEX_AXIS_X] = acc_data.axis_x_val;
+	/////////////////////////
+
+    snprintf(log_tx_buffer, sizeof(log_tx_buffer), "ACC X: %d, Y: %d, Z: %d\n\r",
+    		(int)acc_data.axis_x_val, (int)acc_data.axis_y_val, (int)acc_data.axis_z_val);
+    Logger_Send_Log(log_tx_buffer, strlen(log_tx_buffer));
 	osMessageQueuePut(acceleValsQueueHandle, &acc_data, 0, READ_ACC_INTERVAL_MSEC);
 
 	osDelay(READ_ACC_INTERVAL_MSEC);
@@ -422,15 +434,22 @@ void StartTask02(void *argument)
 void StartTask03(void *argument)
 {
   /* USER CODE BEGIN StartTask03 */
-  Logger_Send_Log("StartTask03\n\r", 16);
+  char log[LOG_MAX_BUFFER_LENGTH] = "StartTask03\n\r";
+  Logger_Send_Log(log, strlen(log));
 
-  Accelerometer_Axes_t acc_data;
-  char log_tx_buffer[LOG_MAX_BUFFER_LENGTH];
-  /* Infinite loop */
+  volatile Accelerometer_Axes_t acc_data;
+  char log_tx_buffer[LOG_MAX_BUFFER_LENGTH] = {0};
+//  /* Infinite loop */
   for(;;)
   {
 	Logger_Send_Log("Task03:\n\r", 12);
-	osMessageQueueGet(acceleValsQueueHandle, &acc_data, 0, READ_ACC_INTERVAL_MSEC);
+
+	////////////////////////
+	//AMIT-TEST
+//	acc_data.axis_x_val = accelerometerValsBuff[E_ACC_VAL_INDEX_AXIS_X];
+	////////////////////////
+
+	osStatus_t queue_status = osMessageQueueGet(acceleValsQueueHandle, (void *)&acc_data, 0, READ_ACC_INTERVAL_MSEC);
 	snprintf(log_tx_buffer, sizeof(log_tx_buffer), "ACC X: %d, Y: %d, Z: %d\n\r",
 	      	(int)acc_data.axis_x_val, (int)acc_data.axis_y_val, (int)acc_data.axis_z_val);
 	Logger_Send_Log(log_tx_buffer, strlen(log_tx_buffer));
